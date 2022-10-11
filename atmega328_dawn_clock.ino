@@ -6,7 +6,7 @@
 #define LIGHT_DUTY 1 // 1...255
 #define LIGHT_DURATION 60 // seconds
 
-#define START_HOUR 6 
+#define START_HOUR 6
 #define START_MINUTE 40
 
 #define END_HOUR 7
@@ -38,19 +38,18 @@ void setup() {
   disp.displayClock(now.hour(), now.minute());
   disp.brightness(0); // 0...7
 
-  while (millis() < LIGHT_DURATION * 1000) {
-    analogWrite(DIM_PIN, LIGHT_DUTY);
-  }
+  analogWrite(DIM_PIN, LIGHT_DUTY);
+  delay((uint32_t)LIGHT_DURATION * 1000);
   analogWrite(DIM_PIN, 0);
 }
 
 void loop() {
   if (millis() - dot_timer > 500) {
     dot_timer = millis();
-    
+
     dot_flag = !dot_flag;
     disp.point(dot_flag);
-    
+
     if (dot_flag) { // one time at second
       now = rtc.now();
       if (now.second() == 0) { // one time at minute update display
