@@ -25,24 +25,25 @@ RTC_DS3231 rtc; // i use ds1307, but it is working
 
 uint32_t dot_timer = 0;
 uint32_t dawn_timer = 0;
+uint32_t light_timer = LIGHT_DURATION;
 uint8_t duty = 0;
 _Bool dot_flag = 0;
 _Bool dawn_flag = 0;
+_Bool light_flag = 1;
 
 DateTime now;
 
 void setup() {
   pinMode(DIM_PIN, OUTPUT);
+  pinMode(13, OUTPUT);
 
-//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // uncomment for time setting, flash, comment, flash again. else this time will be set after every reset
+  //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // uncomment for time setting, flash, comment, flash again. else this time will be set after every reset
 
   now = rtc.now();
   disp.displayClock(now.hour(), now.minute());
   disp.brightness(0); // 0...7
 
   analogWrite(DIM_PIN, LIGHT_DUTY);
-  while (millis() < (uint32_t)(LIGHT_DURATION * 1000));
-  analogWrite(DIM_PIN, 0);
 }
 
 void loop() {
@@ -53,6 +54,12 @@ void loop() {
     disp.point(dot_flag);
 
     if (dot_flag) { // one time at second
+
+      if (light_flag && !(--light_timer)) {
+        light_flag = 0;
+        analogWrite(DIM_PIN, 0);
+      }
+
       now = rtc.now();
       if (now.second() == 0) { // one time at minute update display
         disp.displayClock(now.hour(), now.minute());
