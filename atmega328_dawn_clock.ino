@@ -3,14 +3,16 @@
 
 #define DIM_PIN 3 // mosfet pin
 
-#define LIGHT_DUTY 1 // 1...255
-#define LIGHT_DURATION 60 // seconds
+#define LIGHT_DUTY 3 // 1...255
+#define LIGHT_DURATION 120 // seconds
 
 #define START_HOUR 6
-#define START_MINUTE 40
+#define START_MINUTE 20
 
-#define END_HOUR 7
-#define END_MINUTE 10
+#define END_HOUR 6
+#define END_MINUTE 40
+
+#define DAYS_OF_WEEK 0b0111110 // sa, fr, th, we, tu, mo, su
 
 #define DAWN_STEP_PERIOD ((END_HOUR*60+END_MINUTE) - (START_HOUR*60+START_MINUTE)) * 60000 / 255
 
@@ -32,14 +34,14 @@ DateTime now;
 void setup() {
   pinMode(DIM_PIN, OUTPUT);
 
-  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // uncomment for time setting, flash, comment, flash again. else this time will be set after every reset
+//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // uncomment for time setting, flash, comment, flash again. else this time will be set after every reset
 
   now = rtc.now();
   disp.displayClock(now.hour(), now.minute());
   disp.brightness(0); // 0...7
 
   analogWrite(DIM_PIN, LIGHT_DUTY);
-  delay((uint32_t)LIGHT_DURATION * 1000);
+  while (millis() < (uint32_t)(LIGHT_DURATION * 1000));
   analogWrite(DIM_PIN, 0);
 }
 
@@ -55,7 +57,8 @@ void loop() {
       if (now.second() == 0) { // one time at minute update display
         disp.displayClock(now.hour(), now.minute());
       }
-      if (now.hour() == START_HOUR && now.minute() == START_MINUTE) { // if time to start dawn, up flag
+      if ((1 << now.dayOfTheWeek()) & DAYS_OF_WEEK &&                 // if today is set
+          now.hour() == START_HOUR && now.minute() == START_MINUTE) { // if time to start dawn, up flag
         dawn_flag = 1;
       }
     }
