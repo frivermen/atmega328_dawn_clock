@@ -20,7 +20,7 @@
 GyverTM1637 disp(CLK, DIO);
 
 #include <Wire.h>
-#include "RTClib.h"
+#include "RTClib.h"  // !!! need 1.2.1 version
 RTC_DS3231 rtc; // i use ds1307, but it is working
 
 uint32_t dot_timer = 0;
